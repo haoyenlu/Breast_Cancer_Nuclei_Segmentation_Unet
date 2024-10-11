@@ -27,7 +27,7 @@ Resize to (256,256) for model training
 - IOU
 
 
-#### Result
+### Result
 - Dice: 36.1%
 - IOU: 25.4%
 ![Prediction_Result_0 28](https://github.com/user-attachments/assets/2d4fc93b-41d7-4a41-a781-fa6b678b3fab)
