@@ -84,9 +84,9 @@ def visualize_prediction(model, image, mask, threshold=0.05, method = 'slide', s
     temp_dataset = NucleiDataset(patch_image, patch_mask, T.ToTensor(),augmentation=None)
     temp_dataloader = torch.utils.data.DataLoader(temp_dataset,batch_size=16,shuffle=False)
 
-    for image , mask in temp_dataloader:
-        image = image.to(device).float()
-        pred  = model(image).detach().cpu().numpy()
+    for image_ , mask_ in temp_dataloader:
+        image_ = image_.to(device).float()
+        pred  = model(image_).detach().cpu().numpy()
         prediction.append(pred)
 
     prediction = np.concatenate(prediction,axis=0)
@@ -105,7 +105,6 @@ def visualize_prediction(model, image, mask, threshold=0.05, method = 'slide', s
 
     fig,axs = plt.subplots(1,3,figsize=(15,15))
 
-    axs[0].imshow(image)
     axs[0].imshow(recover_pred_mask >= threshold, alpha=0.7)
     axs[0].set_title(f"Prediction with threshold:{threshold}")
     axs[0].axis('off')

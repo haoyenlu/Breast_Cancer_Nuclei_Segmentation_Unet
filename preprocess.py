@@ -33,10 +33,8 @@ def divide2group(image,mask,group=2,resize_shape = (256,256), discard=True):
 
     return np.stack(img_list,axis=0), np.stack(mask_list,axis=0)
 
-def sliding_window(image, mask , window_size, step_size, discard=True , contrast = False):
+def sliding_window(image, mask , window_size, step_size, discard=True):
     H , W , C = image.shape
-
-    if contrast: image = skimage.exposure.equalize_hist(image)
 
 
     H_step = (H // step_size)

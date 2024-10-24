@@ -6,6 +6,7 @@ import skimage
 import torchvision.transforms as T
 import torch
 import matplotlib.pyplot as plt
+from sklearn.metrics import auc
 
 from preprocess import sliding_window, divide2group
 from visualization import visualize , visualize_prediction
@@ -36,8 +37,8 @@ GROUP_NUM = 2
 
 
 METHOD = 'SLIDE'
-WINDOW_SIZE = 256
-STEP_SIZE = 256
+WINDOW_SIZE = 128
+STEP_SIZE = 128
 
 CONTRAST = False
 
@@ -96,8 +97,8 @@ EPOCHS = 50
 BCE_WEIGHT = 0.5
 model = UNet(num_classes).to(device)
 
-TRAIN = False
-CKPT  = True
+TRAIN = True
+CKPT  = False
 
 
 if TRAIN:
@@ -111,7 +112,7 @@ if TRAIN:
     plt.show()
 
 elif CKPT:
-    model_name = 'best_weight_256_256'
+    model_name = 'best_weight_256_100_aug_contrast'
     checkpoint = f'./checkpoint/{model_name}.pth'
     ckpt = torch.load(checkpoint,map_location=device)
     model.load_state_dict(ckpt)
@@ -124,6 +125,8 @@ if EVALUATE:
     valid_dataset = NucleiDataset(all_images[train_size:],all_masks[train_size:],transformation, augmentation  = None)
     metrics , threshold = evaluate_model(model, valid_dataset)
     fig,axs = plt.subplots(1,3,figsize=(15,8))
+    
+    auc_s = auc(metrics['FPR'],metrics['TPR'])
 
     scale_fn = lambda x: x * 100
 
@@ -133,9 +136,9 @@ if EVALUATE:
 
     fig.savefig('Evaluation.png',bbox_inches='tight')
     plt.show()
-    print(f"Max Dice Score:{max(metrics['dice'])}, Max IOU Score:{max(metrics['iou'])}, Max F1_Score:{max(metrics['f1_score'])}")
+    print(f"Max Dice Score:{max(metrics['dice'])}, Max IOU Score:{max(metrics['iou'])}, Max F1_Score:{max(metrics['f1_score'])}, AUC: {auc_s}")
     print(f"Max Dice Threshold:{threshold[np.argmax(metrics['dice'])]}, Max IOU Threshold:{threshold[np.argmax(metrics['iou'])]}, Max F1_score Threshold:{threshold[np.argmax(metrics['f1_score'])]}")
-
+    print()
 
 SEE_PREDICTION = True
 if SEE_PREDICTION:
@@ -147,4 +150,4 @@ if SEE_PREDICTION:
     if CONTRAST:
         img = skimage.exposure.equalize_hist(img,nbins=256)
 
-    visualize_prediction(model,img , mask , threshold = threshold[np.argmax(metrics['dice'])] , method = METHOD , group_num = GROUP_NUM , window_size = WINDOW_SIZE, step_size = STEP_SIZE , save=True)
+    visualize_prediction(model ,img , mask , threshold = threshold[np.argmax(metrics['dice'])] , method = METHOD , group_num = GROUP_NUM , window_size = WINDOW_SIZE, step_size = STEP_SIZE , save=True)
